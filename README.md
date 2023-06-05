@@ -1,6 +1,6 @@
 # Spring Boot Coding Exercise - Find the oldest user accounts with zero followers
 
-This is a simple coding exercise that will allow you to demonstrate your knowledge
+This is a coding assessment that demonstrate my knowledge
 of spring boot by using a microservice to call a downstream service and return
 some results.
 
@@ -161,3 +161,43 @@ public class OldestUserAccountController {
     return catFactResponse != null ? catFactResponse.getData() : null;
   }
   ```
+  
+  
+  ### HelloWorld class 
+
+```java
+package com.telstra.codechallenge.helloworld;
+
+import lombok.Data;
+
+public class HelloWorld {
+  private final long id;
+  private final String content;
+
+  public HelloWorld(long id, String content) {
+    this.id = id;
+    this.content = content;
+  }
+
+  public long getId() {
+    return id;
+  }
+
+  public String getContent() {
+    return content;
+  }
+}
+``` 
+### Refactored Hello World class with @Data annotation
+
+```java
+package com.telstra.codechallenge.helloworld;
+
+import lombok.Data;
+
+@Data
+public class HelloWorld {
+  private final long id;
+  private final String content;
+}
+```
