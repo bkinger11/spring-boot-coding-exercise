@@ -135,3 +135,29 @@ public class OldestUserAccountController {
     }
 }
 ```
+
+
+## Refactored existing code
+
+### .getCatFacts() method 
+
+```java
+  public List<CatFact> getCatFacts() {
+    CatFactResponse catFactResponse =
+        restTemplate.getForObject(catFactsBaseUrl + "/facts", CatFactResponse.class);
+     List<CatFact> catFacts = null;
+     if (catFactResponse != null) {
+       catFacts = catFactResponse.getData();
+      }
+    return catFacts;
+  }
+  ``` 
+### Refactored .getCatFacts() method
+
+```java
+  public List<CatFact> getCatFacts() {
+    CatFactResponse catFactResponse =
+        restTemplate.getForObject(catFactsBaseUrl + "/facts", CatFactResponse.class);
+    return catFactResponse != null ? catFactResponse.getData() : null;
+  }
+  ```
