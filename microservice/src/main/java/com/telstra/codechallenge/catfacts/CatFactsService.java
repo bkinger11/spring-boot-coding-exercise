@@ -26,12 +26,6 @@ public class CatFactsService {
   public List<CatFact> getCatFacts() {
     CatFactResponse catFactResponse =
         restTemplate.getForObject(catFactsBaseUrl + "/facts", CatFactResponse.class);
-//    List<CatFact> catFacts = null;
-//    if (catFactResponse != null) {
-//      catFacts = catFactResponse.getData();
-//    }
-//
-//    return catFacts;
     return catFactResponse != null ? catFactResponse.getData() : null;
   }
 }
