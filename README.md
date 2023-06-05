@@ -8,7 +8,7 @@ some results.
 
 ### Oldest User Account 
 
-'''
+```
 package com.telstra.codechallenge.oldestuseraccounts;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -20,7 +20,7 @@ public class OldestUserAccount {
     private String login;
     private String html_url;
 }
-'''
+```
 
 This is a multi-module maven project with two modules:
 
