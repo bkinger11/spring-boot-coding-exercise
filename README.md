@@ -22,59 +22,116 @@ public class OldestUserAccount {
 }
 ```
 
-This is a multi-module maven project with two modules:
 
-- The `micoservice` module produces a spring boot application.
-- The `functional-tests` is used to run functional tests using the [karate](https://github.com/intuit/karate) library.
+### Oldest User Account Reponse
 
-## Instructions
+``` java
+package com.telstra.codechallenge.oldestuseraccounts;
 
-Select one of the two exercises below and add the required behaviour to the spring boot application in the microservice module. You can:
+import java.util.List;
 
-- Add libraries you need.
-- Refactor any of the existing code.
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
-You will see that there are already a couple of endpoints in the `microservice` they are fundamentally there to demonstrate the use of the [karate](https://github.com/intuit/karate) library and should not be taken as complete examples.
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+public class OldestUserAccountResponse {
+    private List<OldestUserAccount> items;
+}
+```
+### Oldest User Account Service
 
-### Assessment
+```java
+package com.telstra.codechallenge.oldestuseraccounts;
 
-Your submission will be judged on the following criteria.
+import java.util.Collections;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
-- The solution works.
-- The solution is maintainable.
-- The solution is tested.
-- The solution is appropriate.
+@Service
+public class OldestUserAccountService {
 
-## The Exercises
+    private static final Logger LOGGER = LoggerFactory.getLogger(OldestUserAccountService.class);
 
-Example curl api calls for these exercises are listed in the following gist https://gist.github.com/bartonhammond/0a19da4c24c0f644ae38
+    @Value("${oldestUserAccounts.base.url}")
+    private String oldestUserAccountsBaseUrl;
 
-**1. Find the hottest repositories created in the last week**
+    private final RestTemplate restTemplate;
 
-Use the [GitHub API][1] to expose an endpoint in this microservice that will get a list of the
-highest starred repositories in the last week.
+    public OldestUserAccountService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
-The endpoint should accept a parameter that sets the number of repositories to return.
+    /**
+     * Returns an array of github oldest user accounts with zero followers.
+     * Taken from <a href="https://api.github.com/search/users?q=followers:0&sort=joined&order=asc">https://api.github.com/search/users?q=followers:0&sort=joined&order=asc</a>.
+     *
+     * @return - oldest user account list.
+     */
+    public List<OldestUserAccount> findOldestUserAccountsWithZeroFollowers(int count) {
+        String url = oldestUserAccountsBaseUrl + "/search/users?q=followers:0&sort=joined&order=asc&per_page=" + count;
 
-The following fields should be returned:
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Accept", "application/vnd.github.vnd.github.preview");
 
-      html_url
-      watchers_count
-      language
-      description
-      name
+        try {
+            HttpEntity<?> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<OldestUserAccountResponse> responseEntity = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    requestEntity,
+                    OldestUserAccountResponse.class
+            );
 
-**2. Find the oldest user accounts with zero followers**
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                OldestUserAccountResponse response = responseEntity.getBody();
+                if (response != null && response.getItems() != null) {
+                    return response.getItems().subList(0, Math.min(count, response.getItems().size()));
+                }
+            } else {
+                LOGGER.error("Request failed with status code: {}", responseEntity.getStatusCode());
+            }
+        } catch (HttpClientErrorException ex) {
+            LOGGER.error("Request failed with error: {} - {}", ex.getStatusCode(), ex.getStatusText());
+        } catch (Exception ex) {
+            LOGGER.error("Request failed with exception: {}", ex.getMessage());
+        }
 
-Use the [GitHub API][1] to expose an endpoint in this microservice that will find the oldest
-accounts with zero followers.
+        return null;
+    }
+}
 
-The endpoint should accept a parameter that sets the number of accounts to return.
+```
 
-The following fields should be returned:
+### Oldest User Account Controller
 
-      id
-      login
-      html_url
+```java
+package com.telstra.codechallenge.oldestuseraccounts;
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-[1]: http://developer.github.com/v3/search/#search-repositories
+@RestController
+public class OldestUserAccountController {
+    private final OldestUserAccountService oldestUserAccountService;
+
+    public OldestUserAccountController(OldestUserAccountService oldestUserAccountService) {
+        this.oldestUserAccountService = oldestUserAccountService;
+    }
+
+    @GetMapping("/oldestAccounts")
+    public List<OldestUserAccount> findOldestUserAccounts(@RequestParam(defaultValue = "10") int count) {
+        return oldestUserAccountService.findOldestUserAccountsWithZeroFollowers(count);
+    }
+}
+```
