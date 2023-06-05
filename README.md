@@ -4,7 +4,22 @@ This is a simple coding exercise that will allow you to demonstrate your knowled
 of spring boot by using a microservice to call a downstream service and return
 some results.
 
-## Project Structure
+## Olest User Account with Zero followers
+
+###Oldest User Account 
+
+package com.telstra.codechallenge.oldestuseraccounts;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+public class OldestUserAccount {
+    private long id;
+    private String login;
+    private String html_url;
+}
+
 
 This is a multi-module maven project with two modules:
 
