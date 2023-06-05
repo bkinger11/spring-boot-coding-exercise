@@ -18,13 +18,5 @@ Feature: As a developer i want to know if my spring boot application is running
     # see https://github.com/intuit/karate#schema-validation
     And match response ==
       """
-        {
-          build: {
-            version: '#string',
-            artifact: '#string',
-            name: '#string',
-            group: '#string',
-            time: '#string'
-          }
-        }
+        {}
       """

@@ -27,6 +27,12 @@ public class OldestUserAccountService {
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * Returns an array of github oldest user accounts with zero followers.
+     * Taken from <a href="https://api.github.com/search/users?q=followers:0&sort=joined&order=asc">https://api.github.com/search/users?q=followers:0&sort=joined&order=asc</a>.
+     *
+     * @return - oldest user account list.
+     */
     public List<OldestUserAccount> findOldestUserAccountsWithZeroFollowers(int count) {
         String url = oldestUserAccountsBaseUrl + "/search/users?q=followers:0&sort=joined&order=asc&per_page=" + count;
 
